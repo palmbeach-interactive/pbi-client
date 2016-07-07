@@ -18,6 +18,7 @@ should look like;
 
     api_url=https://service.pbi.io/
     workspace=~/code/
+    virtualenv=~/srv/
     [user]
     email=karl.klammer@pbi.io
     api_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

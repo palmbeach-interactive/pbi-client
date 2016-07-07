@@ -4,6 +4,7 @@ import os
 from fabric.colors import green, red, blue, yellow, cyan
 from fabric.operations import prompt
 from .service_api import ApplicationAPIClient
+from .installer import LocalInstaller
 from .util import colors
 
 
@@ -18,11 +19,13 @@ class ApplicationHandler:
         self.key = key
 
         workspace_dir = kwargs['conf'].get('workspace')
+        virtualenv_dir = kwargs['conf'].get('virtualenv')
 
         if not workspace_dir:
             raise IOError('workspace not configured')
 
         self.workspace_dir = os.path.expanduser(workspace_dir)
+        self.virtualenv_dir = os.path.expanduser(virtualenv_dir) if virtualenv_dir else None
 
         api_base_url = kwargs['conf'].get('api_url')
 
@@ -92,3 +95,30 @@ class ApplicationHandler:
 
         if confirm:
             result = self.api_client.deploy_run(deployer)
+
+    def install(self):
+
+        application = self.api_client.detail(self.key)
+
+
+        print((green(':' * 72)))
+        print('key:             {}'.format(application['key']))
+        print('uuid:            {}'.format(application['uuid']))
+        print('repository:      {}'.format(application['repository']))
+
+        installer = LocalInstaller(
+            key=application['key'],
+            repository=application['repository'],
+            workspace_dir = self.workspace_dir,
+            virtualenv_dir = self.virtualenv_dir,
+        )
+
+
+        installer.run()
+
+        # local_path = os.path.join(self.workspace_dir, application['key'])
+        # if not os.path.isdir(local_path):
+        #     print(yellow('local workspace: {} [MISSING]'.format(local_path)))
+        # else:
+        #     print(green('local workspace: {} [OK]'.format(local_path)))
+

@@ -183,7 +183,7 @@ class Incubator:
         commands = []
 
         # in-file replacements
-        extensions = ('py', 'html', 'txt', 'conf', 'xml', 'scpt', 'iml', 'name', 'md', 'json', 'sh', )
+        extensions = ('py', 'html', 'txt', 'conf', 'xml', 'scpt', 'iml', 'name', 'md', 'json', 'yaml', 'sh', )
         for pattern in patterns:
 
             commands.append(
@@ -220,18 +220,6 @@ class Incubator:
     def incubate(self):
 
         self.get_redmine_project()
-
         self.git_clone()
         self.replace()
-
         self.git_push()
-
-
-
-    # def initialize_project(self):
-    #
-    #     self.get_redmine_project()
-    #     self.git_clone()
-    #     self.replace()
-    #     self.git_push()
-

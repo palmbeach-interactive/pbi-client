@@ -21,6 +21,7 @@ PBI.IO - CLI tool
     pbi example.com info
     pbi example.com deploy
     pbi example.com incubate
+    pbi example.com install
 ----------------------------------------------------------------
 """
 
@@ -94,13 +95,11 @@ def main():
         action = base[1]
         key = base[0]
 
-    if action in ['deploy', 'info', 'list', 'check']:
+    if action in ['deploy', 'info', 'list', 'check', 'install']:
         handler = ApplicationHandler(key, **args_dict)
         getattr(handler, action)()
 
     if action in ['incubate',]:
-
-        print '*****'
 
         handler = Incubator(key, **args_dict)
         getattr(handler, action)()
