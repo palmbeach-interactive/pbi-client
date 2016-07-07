@@ -87,7 +87,7 @@ class LocalInstaller(object):
         if prompt('Continue? y/n', default='y').lower() == 'y':
             migrate = self.run_migrations(local_path=local_path, virtualenv=virtualenv)
 
-        if os.path.exists(os.path.join(local_path, 'packages.json')):
+        if os.path.exists(os.path.join(local_path, 'package.json')):
             print((cyan(':' * 72)))
             print(cyan('install npm packages'))
             if prompt('Continue? y/n', default='y').lower() == 'y':
@@ -98,10 +98,6 @@ class LocalInstaller(object):
             print(cyan('run tmux session'))
             if prompt('Continue? y/n', default='y').lower() == 'y':
                 tmux = self.run_tmuxp(local_path=local_path)
-
-
-
-
 
 
     def checkout_code(self, repository, local_path, branch):
