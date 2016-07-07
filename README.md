@@ -5,7 +5,9 @@ pbi.io - Internal CLI Tool
 Installation
 ------------
 
-    pip install -e git+https://github.com/palmbeach-interactive/pbi-client.git#egg=pbi-client
+Make sure no virtualenv is activated. the pbi client should be installed globally.
+
+    sudo pip install -I -e "git+https://github.com/palmbeach-interactive/pbi-client.git#egg=pbi-client"
 
 Configuration
 -------------
