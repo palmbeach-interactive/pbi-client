@@ -37,4 +37,9 @@ Verify Installation
 Usage
 -----
 
-    pbi -h
+    pbi list                                                                                                                                               │    pbi list
+    pbi init                                                                                                                                               │    pbi list
+    pbi info (example.com)                                                                                                                                         │    pbi info (example.com)
+    pbi deploy (example.com)                                                                                                                                       │    pbi deploy (example.com)
+    pbi incubate (example.com)                                                                                                                                     │    pbi incubate (example.com)
+    pbi install (example.com)

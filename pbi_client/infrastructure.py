@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 import os
+import yaml
 from fabric.colors import green, red, blue, yellow, cyan
 from fabric.operations import prompt
 from .service_api import ApplicationAPIClient
 from .installer import LocalInstaller
 from .util import colors
+
+from .settings import PBI_PROJECT_CONFIG_FILE
 
 
 def colorize(line, color=colors.BOLD):
@@ -78,6 +81,30 @@ class ApplicationHandler:
             print(yellow('local workspace: {} [MISSING]'.format(local_path)))
         else:
             print(green('local workspace: {} [OK]'.format(local_path)))
+
+    def init(self):
+
+        # get key from directory
+        cwd = os.getcwd()
+        project_dir = os.path.basename(cwd)
+        key = project_dir.strip()
+        local_path = os.path.join(self.workspace_dir, key)
+
+        print((green(':' * 72)))
+        print('key:             {}'.format(key))
+        print('local path:      {}'.format(local_path))
+        print('')
+
+        confirm = prompt(
+            'Looks correct? Do you want to add "{0}" config file? y/n'.format(PBI_PROJECT_CONFIG_FILE), default='n'
+        ).lower() == 'y'
+
+        if confirm:
+            project_settings = {
+                'key': key
+            }
+            with open(PBI_PROJECT_CONFIG_FILE, 'w') as outfile:
+                outfile.write(yaml.safe_dump(project_settings, default_flow_style=False))
 
     def deploy(self):
 

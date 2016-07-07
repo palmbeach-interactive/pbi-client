@@ -43,6 +43,7 @@ setup(
     install_requires=[
         'requests>=2.8,<3',
         'Fabric>=1.10.1,<1.20',
+        'pyyaml',
         'configobj',
         'python-redmine',
     ],

@@ -6,11 +6,13 @@ __version__ = '0.0.1'
 
 import argparse
 import os
+import sys
+import yaml
 from incubator import Incubator
 from infrastructure import ApplicationHandler
 from configobj import ConfigObj
 
-DEFAULT_SOURCE = 'ssh://git@lab.hazelfire.com/palmbeach/example-com.git'
+from settings import DEFAULT_SOURCE, PBI_PROJECT_CONFIG_FILE
 
 
 usage="""
@@ -18,10 +20,10 @@ usage="""
 PBI.IO - CLI tool
 ----------------------------------------------------------------
     pbi list
-    pbi example.com info
-    pbi example.com deploy
-    pbi example.com incubate
-    pbi example.com install
+    pbi info (example.com)
+    pbi deploy (example.com)
+    pbi incubate (example.com)
+    pbi install (example.com)
 ----------------------------------------------------------------
 """
 
@@ -37,7 +39,7 @@ def main():
 
     parser.add_argument(
         'base',
-        metavar='<domain.tld> <action>',
+        metavar='<action> <domain.tld>',
         nargs='+',
         help='Base command',
     )
@@ -92,10 +94,27 @@ def main():
         action = base[0]
         key = None
     elif len(base) == 2:
-        action = base[1]
-        key = base[0]
+        action = base[0]
+        key = base[1]
 
-    if action in ['deploy', 'info', 'list', 'check', 'install']:
+
+    # check for config file (.pbi.yaml)
+    args_dict['project'] = None
+    if os.path.exists(PBI_PROJECT_CONFIG_FILE):
+        stream = open(PBI_PROJECT_CONFIG_FILE, "r")
+        args_dict['project'] = yaml.load(stream)
+        key = args_dict['project'].get('key')
+
+    if action in ['init',] and key:
+        if os.path.exists(PBI_PROJECT_CONFIG_FILE):
+            raise EnvironmentError(
+                'Configuration file already exists: {0}. You have to delete it first in order to run "init" again'.format(
+                    PBI_PROJECT_CONFIG_FILE))
+        else:
+            raise EnvironmentError('You have to run "init" in the project directory, without specifying a key.')
+
+
+    if action in ['init', 'deploy', 'info', 'list', 'check', 'install']:
         handler = ApplicationHandler(key, **args_dict)
         getattr(handler, action)()
 

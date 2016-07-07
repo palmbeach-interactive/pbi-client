@@ -87,15 +87,17 @@ class LocalInstaller(object):
         if prompt('Continue? y/n', default='y').lower() == 'y':
             migrate = self.run_migrations(local_path=local_path, virtualenv=virtualenv)
 
-        print((cyan(':' * 72)))
-        print(cyan('install npm packages'))
-        if prompt('Continue? y/n', default='y').lower() == 'y':
-            migrate = self.install_npm_packages(local_path=local_path)
+        if os.path.exists(os.path.join(local_path, 'packages.json')):
+            print((cyan(':' * 72)))
+            print(cyan('install npm packages'))
+            if prompt('Continue? y/n', default='y').lower() == 'y':
+                migrate = self.install_npm_packages(local_path=local_path)
 
-        print((cyan(':' * 72)))
-        print(cyan('run tmux session'))
-        if prompt('Continue? y/n', default='y').lower() == 'y':
-            tmux = self.run_tmuxp(local_path=local_path)
+        if os.path.exists(os.path.join(local_path, '.tmuxp.yaml')):
+            print((cyan(':' * 72)))
+            print(cyan('run tmux session'))
+            if prompt('Continue? y/n', default='y').lower() == 'y':
+                tmux = self.run_tmuxp(local_path=local_path)
 
 
 
@@ -117,12 +119,20 @@ class LocalInstaller(object):
     def install_virtualenv(self, local_path, virtualenv):
 
         virtualenv_bin = os.path.join(virtualenv, 'bin')
-
         command = 'virtualenv {0}'.format(virtualenv)
         local(command)
 
         with lcd(local_path):
-            command = '{0} install -r {1}'.format(os.path.join(virtualenv_bin, 'pip'), os.path.join('website', 'requirements', 'requirements.txt'))
+
+            if os.path.exists('requirements.txt'):
+                requirements_path = 'requirements.txt'
+            else:
+                requirements_path = os.path.join('website', 'requirements', 'requirements.txt')
+
+            if not os.path.exists(requirements_path):
+                raise IOError('requirements.txt does not exist: {}'.format(requirements_path))
+
+            command = '{0} install -r {1}'.format(os.path.join(virtualenv_bin, 'pip'), requirements_path)
             local(command)
 
         return os.path.isdir(virtualenv)
