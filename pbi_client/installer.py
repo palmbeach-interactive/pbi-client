@@ -120,8 +120,8 @@ class LocalInstaller(object):
 
         with lcd(local_path):
 
-            if os.path.exists('requirements.txt'):
-                requirements_path = 'requirements.txt'
+            if os.path.exists(os.path.join(local_path, 'requirements.txt')):
+                requirements_path = os.path.join(local_path, 'requirements.txt')
             else:
                 requirements_path = os.path.join('website', 'requirements', 'requirements.txt')
 
