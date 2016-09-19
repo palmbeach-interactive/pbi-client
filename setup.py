@@ -9,7 +9,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='pbi-client',
-    version='0.0.1',
+    version='0.0.2',
 
     description='pbi.io - Internal CLI Tool',
     long_description=long_description,

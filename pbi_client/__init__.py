@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 import argparse
 import os
@@ -18,7 +18,7 @@ from settings import DEFAULT_SOURCE, PBI_PROJECT_CONFIG_FILE
 
 usage="""
 ----------------------------------------------------------------
-PBI.IO - CLI tool
+PBI.IO - CLI tool - v{version}
 ----------------------------------------------------------------
     pbi list
     pbi info (example.com)
@@ -27,7 +27,7 @@ PBI.IO - CLI tool
     pbi install (example.com) - local project installaton
     pbi load (example.com) - load tmux session
 ----------------------------------------------------------------
-"""
+""".format(version=__version__)
 
 epilog="""
 - pbi.io -------------------------------------------------------
