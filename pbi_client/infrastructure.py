@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 import os
+import sys
 import yaml
 from fabric.colors import green, red, blue, yellow, cyan
+from fabric.api import local
 from fabric.operations import prompt
 from .service_api import ApplicationAPIClient
 from .installer import LocalInstaller
@@ -127,7 +129,6 @@ class ApplicationHandler:
 
         application = self.api_client.detail(self.key)
 
-
         print((green(':' * 72)))
         print('key:             {}'.format(application['key']))
         print('uuid:            {}'.format(application['uuid']))
@@ -140,7 +141,6 @@ class ApplicationHandler:
             virtualenv_dir = self.virtualenv_dir,
         )
 
-
         installer.run()
 
         # local_path = os.path.join(self.workspace_dir, application['key'])
@@ -148,4 +148,26 @@ class ApplicationHandler:
         #     print(yellow('local workspace: {} [MISSING]'.format(local_path)))
         # else:
         #     print(green('local workspace: {} [OK]'.format(local_path)))
+
+    def load(self):
+
+        project_dir = os.path.join(self.workspace_dir, self.key)
+        tmuxp_file = os.path.join(project_dir, '.tmuxp.yaml')
+
+        print((green(':' * 72)))
+        print('key:             {}'.format(self.key))
+        print('workspace:       {}'.format(self.workspace_dir))
+        print('project path:    {}'.format(project_dir))
+
+        if not os.path.isdir(project_dir):
+            print(yellow('[MISSING] local workspace: {}'.format(project_dir)))
+            sys.exit(0)
+
+        if not os.path.exists(tmuxp_file):
+            print(yellow('[MISSING] tmuxp config file: {}'.format(tmuxp_file)))
+            sys.exit(0)
+
+        local('tmuxp load {}'.format(tmuxp_file))
+
+
 

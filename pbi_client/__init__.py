@@ -11,6 +11,7 @@ import yaml
 from incubator import Incubator
 from infrastructure import ApplicationHandler
 from configobj import ConfigObj
+from check import self_check
 
 from settings import DEFAULT_SOURCE, PBI_PROJECT_CONFIG_FILE
 
@@ -22,8 +23,9 @@ PBI.IO - CLI tool
     pbi list
     pbi info (example.com)
     pbi deploy (example.com)
-    pbi incubate (example.com)
-    pbi install (example.com)
+    pbi incubate (example.com) - initialize a project
+    pbi install (example.com) - local project installaton
+    pbi load (example.com) - load tmux session
 ----------------------------------------------------------------
 """
 
@@ -35,6 +37,9 @@ epilog="""
 
 
 def main():
+
+    self_check()
+
     parser = argparse.ArgumentParser(usage=usage, epilog=epilog)
 
     parser.add_argument(
@@ -113,8 +118,7 @@ def main():
         else:
             raise EnvironmentError('You have to run "init" in the project directory, without specifying a key.')
 
-
-    if action in ['init', 'deploy', 'info', 'list', 'check', 'install']:
+    if action in ['init', 'deploy', 'info', 'list', 'check', 'install', 'load']:
         handler = ApplicationHandler(key, **args_dict)
         getattr(handler, action)()
 
