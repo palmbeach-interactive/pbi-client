@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 import argparse
 import os
 import sys
 import yaml
 from incubator import Incubator
+from client import ClientHandler
 from infrastructure import ApplicationHandler
 from configobj import ConfigObj
 from check import self_check
@@ -21,6 +22,7 @@ usage="""
 PBI.IO - CLI tool - v{version}
 ----------------------------------------------------------------
     pbi list
+    pbi update
     pbi info (example.com)
     pbi deploy (example.com)
     pbi incubate (example.com) - initialize a project
@@ -125,5 +127,10 @@ def main():
     if action in ['incubate',]:
 
         handler = Incubator(key, **args_dict)
+        getattr(handler, action)()
+
+    if action in ['update',]:
+
+        handler = ClientHandler(**args_dict)
         getattr(handler, action)()
 
