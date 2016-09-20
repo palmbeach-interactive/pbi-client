@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 import os
 import sys
+import time
 import yaml
 from fabric.colors import green, red, blue, yellow, cyan
 from fabric.api import local, lcd, warn_only, env
@@ -25,9 +26,23 @@ class ClientHandler:
     def update(self):
 
         if prompt('Update pbi client? Y/n', default='n').lower() == 'y':
+
+            if hasattr(sys, 'real_prefix'):
+                print((red(':' * 72)))
+                print(red('You can not update the client while having an activated virtualenv. Run'))
+                print(red('$ deactivate'))
+                print(red('first.'))
+                print((red(':' * 72)))
+                sys.exit()
+
             print(cyan('You likely will be promted to enter your root password.'))
+            print(red('After updating the pbi cli-client the proccess will exit.'))
+            time.sleep(3)
+
+
             command = 'sudo pip install -I -e "git+https://github.com/palmbeach-interactive/pbi-client.git#egg=pbi-client"'
             local(command)
+
             sys.exit(0)
 
 
@@ -45,12 +60,3 @@ class ClientHandler:
                 command = 'ansible-galaxy install -f -r requirements.yml'
                 local(command)
 
-
-
-
-
-
-
-
-
-        pass
