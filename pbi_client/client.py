@@ -39,7 +39,6 @@ class ClientHandler:
             print(red('After updating the pbi cli-client the proccess will exit.'))
             time.sleep(3)
 
-
             command = 'sudo pip install -I -e "git+https://github.com/palmbeach-interactive/pbi-client.git#egg=pbi-client"'
             local(command)
 
@@ -59,4 +58,3 @@ class ClientHandler:
             with lcd(self.playbook_dir):
                 command = 'ansible-galaxy install -f -r requirements.yml'
                 local(command)
-

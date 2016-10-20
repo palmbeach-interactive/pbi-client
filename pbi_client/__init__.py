@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 import argparse
 import os
@@ -26,6 +26,8 @@ PBI.IO - CLI tool - v{version}
     pbi info (example.com)
     pbi deploy (example.com)
     pbi incubate (example.com) - initialize a project
+    pbi create-project (example.com) - create a project on service.pbi.io
+    pbi create-application (example.com) - create a application on service.pbi.io
     pbi install (example.com) - local project installaton
     pbi load (example.com) - load tmux session
 ----------------------------------------------------------------
@@ -98,10 +100,10 @@ def main():
 
     base = args_dict['base']
     if len(base) == 1:
-        action = base[0]
+        action = base[0].replace('-', '_')
         key = None
     elif len(base) == 2:
-        action = base[0]
+        action = base[0].replace('-', '_')
         key = base[1]
 
 
@@ -120,7 +122,7 @@ def main():
         else:
             raise EnvironmentError('You have to run "init" in the project directory, without specifying a key.')
 
-    if action in ['init', 'deploy', 'info', 'list', 'check', 'install', 'load']:
+    if action in ['init', 'deploy', 'info', 'list', 'check', 'install', 'load', 'create_project', 'create_application']:
         handler = ApplicationHandler(key, **args_dict)
         getattr(handler, action)()
 

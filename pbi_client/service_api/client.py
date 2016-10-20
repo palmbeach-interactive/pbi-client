@@ -1,4 +1,5 @@
 import requests
+import time
 
 HEADER = '\033[97m'
 OKBLUE = '\033[94m'
@@ -20,7 +21,7 @@ class APIException(Exception):
 
 class APIClient(object):
 
-    def __init__(self, email, api_key, api_base_url=None):
+    def __init__(self, email, api_key, api_base_url=API_BASE_URL):
 
         if not email:
             raise IOError('email not configured')
@@ -30,15 +31,12 @@ class APIClient(object):
 
         self.client_headers = API_CLIENT_HEADERS
         self.client_headers['Authorization'] = 'ApiKey {}:{}'.format(email, api_key)
-        self.api_base_url = api_base_url + 'api/v1/' if api_base_url else API_BASE_URL + 'api/v1/'
+        self.api_base_url = api_base_url + 'api/v1/'
 
     def check_version(self):
-
         from .. import  __version__
-
         print __version__
 
-        pass
 
 
 
@@ -47,9 +45,24 @@ class ApplicationAPIClient(APIClient):
 
     def get(self, url, *args, **kwargs):
         r = requests.get(url, headers=self.client_headers, *args, **kwargs)
-
         if not r.status_code == 200:
             raise APIException('status: {} accessing resource: {}'.format(r.status_code, url))
+
+        return r
+
+
+    def post(self, url, payload, *args, **kwargs):
+        r = requests.post(url, headers=self.client_headers, json=payload, *args, **kwargs)
+
+        if not r.status_code in [200, 201]:
+            raise APIException('status: {} accessing resource: {}'.format(r.status_code, url))
+
+        # created -> redirect
+        if r.status_code == 201:
+            location = r.headers.get('Location', None)
+            if location:
+                time.sleep(1)
+                return self.get(self.api_base_url + location.replace('/api/v1/', ''))
 
         return r
 
@@ -61,6 +74,12 @@ class ApplicationAPIClient(APIClient):
     def detail(self, key):
         url = self.api_base_url + 'infrastructure/application/{}/'.format(key)
         r = self.get(url)
+        return r.json()
+
+    def create(self, payload):
+        url = self.api_base_url + 'infrastructure/application/'
+
+        r = self.post(url, payload)
         return r.json()
 
     def get_deployer(self, key):

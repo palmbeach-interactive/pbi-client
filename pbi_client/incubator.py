@@ -14,6 +14,9 @@ from fabric.contrib import files
 from fabric.operations import prompt
 from logging.config import fileConfig
 
+# TODO: this is hakish...
+from .service_api import ApplicationAPIClient
+
 NUM_CHARS = 72
 DEFAULT_SLEEP = 10
 
@@ -36,6 +39,8 @@ class Incubator:
 
         self.source = kwargs.get('source')
 
+        self.conf = kwargs.get('conf')
+
         if self.source:
             name = os.path.basename(self.source)
             if name.endswith('.git'):
@@ -49,7 +54,7 @@ class Incubator:
         self.destination_path = os.path.expanduser(os.path.join('~/code', key))
         self.force_actions = force_actions
 
-        self.redmine_client = self.get_redmine_client()
+
         self.redmine_project = None
 
         # self.redmine_client = None
@@ -59,6 +64,9 @@ class Incubator:
 
     def selftest(self):
         pass
+
+
+
 
     def get_redmine_client(self):
 
@@ -75,6 +83,7 @@ class Incubator:
 
         return self.redmine_client
 
+
     def get_redmine_project(self):
 
         project_id = self.key.replace('.', '-')
@@ -85,7 +94,6 @@ class Incubator:
             project = self.redmine_client.project.get(project_id)
         except ResourceNotFoundError as e:
 
-            print e
             create = prompt('Project not found on lab. Create it?', default='n').lower()
 
             parent_id = prompt('Parent project id', default='palmbeach').lower()
@@ -102,7 +110,6 @@ class Incubator:
                 project.inherit_members = True
                 project.enabled_module_names = ['repository', 'gantt']
                 project.save()
-
 
         pass
 
@@ -210,16 +217,41 @@ class Incubator:
                     commands.append(line)
 
         for command in commands:
-            #print(command)
             local(command)
 
 
-        pass
+    def link_service_project(self):
+
+        if not prompt('do you want to create an application on service.pbi.io?', default='n').lower() == 'y':
+            return
+
+
+        project_id = self.key.replace('.', '-')
+        project_key = self.key
+        repository = 'ssh://git@lab.hazelfire.com/palmbeach/{project_id}'.format(project_id=project_id)
+
+
+        api_base_url = self.conf.get('api_url')
+        user = self.conf.get('user')
+        email = user.get('email')
+        api_key = user.get('api_key')
+
+        api_client = ApplicationAPIClient(email, api_key, api_base_url)
+
+        payload = {
+            'key': self.key,
+            'repository': repository,
+        }
+
+        print api_client.create(payload)
+
 
 
     def incubate(self):
 
+        self.redmine_client = self.get_redmine_client()
         self.get_redmine_project()
         self.git_clone()
         self.replace()
         self.git_push()
+        self.link_service_project()

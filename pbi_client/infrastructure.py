@@ -62,7 +62,6 @@ class ApplicationHandler:
             print('key:        {}'.format(application['key']))
             #print('uuid:       {}'.format(application['uuid']))
             #print('repository: {}'.format(application['repository']))
-            #print('branch:     {}'.format(application['repository_branch']))
             #print('website:    {}'.format(application['website']))
             #print('admin:      {}'.format(application['website_admin']))
             #print('')
@@ -78,15 +77,27 @@ class ApplicationHandler:
         print('key:             {}'.format(application['key']))
         print('uuid:            {}'.format(application['uuid']))
         print('repository:      {}'.format(application['repository']))
-        print('branch:          {}'.format(application['repository_branch']))
-        print('website:         {}'.format(application['website']))
-        print('admin:           {}'.format(application['website_admin']))
+
 
         local_path = os.path.join(self.workspace_dir, application['key'])
         if not os.path.isdir(local_path):
             print(yellow('local workspace: {} [MISSING]'.format(local_path)))
         else:
             print(green('local workspace: {} [OK]'.format(local_path)))
+
+    def create_application(self):
+
+
+        payload = {
+            'key': self.key,
+        }
+        application = self.api_client.create(payload)
+
+        print((green(':' * 72)))
+        print('key:             {}'.format(application['key']))
+        print('uuid:            {}'.format(application['uuid']))
+        print('repository:      {}'.format(application['repository']))
+
 
     def init(self):
 
