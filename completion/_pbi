@@ -1,0 +1,46 @@
+#compdef pbi
+# ------------------------------------------------------------------------------
+# Description
+# -----------
+#
+#  Completion script for Palmbeach Interactice CLI client
+#
+#  Source: https://github.com/palmbeach-interactive/pbi-client
+#
+# ------------------------------------------------------------------------------
+
+local -a options arguments 
+#options=('-c:description for -c opt' '-d:description for -d opt')
+
+
+declare target_list
+target_list=(`pbi list 2>/dev/null`)
+
+
+_targets() {
+    _describe -t commands "fabric targets" target_list
+}
+
+arguments=(
+    'list:List projects in your account' 
+    'update:Update pbi client & configuration repository'
+    'load:Load project in tmux session'
+)
+
+
+
+_describe 'values' options -- arguments
+
+
+if [[ CURRENT -ge 1 ]]; then
+    case $state in
+        noargs)
+             _message "nothing to complete";;
+        levels)
+            _describe -t commands "output levels" output_levels;;
+        *)
+            _targets;;
+    esac
+
+    return
+fi
