@@ -8,10 +8,17 @@ from fabric.api import local
 from fabric.operations import prompt
 from .service_api import ApplicationAPIClient
 from .installer import LocalInstaller
-from .deployer import LocalDeployer
+from .deployer import LocalDeployer, DokkuDeployer
 from .util import colors
 
 from .settings import PBI_PROJECT_CONFIG_FILE
+
+
+DEPLOYMENT_TYPES = {
+    'local':  ['l', 'local'],
+    'remote': ['r', 'remote'],
+    'dokku':  ['d', 'dokku'],
+}
 
 
 def colorize(line, color=colors.BOLD):
@@ -27,6 +34,8 @@ class ApplicationHandler:
         workspace_dir = kwargs['conf'].get('workspace')
         virtualenv_dir = kwargs['conf'].get('virtualenv')
         infrastructure_dir = kwargs['conf'].get('infrastructure')
+        self.project_settings = kwargs['project']
+        self.deployment_type = kwargs['project'].get('deployment')
 
         if not workspace_dir:
             raise IOError('workspace not configured')
@@ -58,7 +67,7 @@ class ApplicationHandler:
         result = self.api_client.list()
 
         for application in result['objects']:
-            print((green(':' * 72)))
+            print((cyan(':' * 72)))
             print('key:        {}'.format(application['key']))
             #print('uuid:       {}'.format(application['uuid']))
             #print('repository: {}'.format(application['repository']))
@@ -73,7 +82,7 @@ class ApplicationHandler:
 
         application = self.api_client.detail(self.key)
 
-        print((green(':' * 72)))
+        print((cyan(':' * 72)))
         print('key:             {}'.format(application['key']))
         print('uuid:            {}'.format(application['uuid']))
         print('repository:      {}'.format(application['repository']))
@@ -93,13 +102,13 @@ class ApplicationHandler:
         }
         application = self.api_client.create(payload)
 
-        print((green(':' * 72)))
+        print((cyan(':' * 72)))
         print('key:             {}'.format(application['key']))
         print('uuid:            {}'.format(application['uuid']))
         print('repository:      {}'.format(application['repository']))
 
 
-    def init(self):
+    def initialize(self):
 
         # get key from directory
         cwd = os.getcwd()
@@ -107,7 +116,7 @@ class ApplicationHandler:
         key = project_dir.strip()
         local_path = os.path.join(self.workspace_dir, key)
 
-        print((green(':' * 72)))
+        print((cyan(':' * 72)))
         print('key:             {}'.format(key))
         print('local path:      {}'.format(local_path))
         print('')
@@ -127,13 +136,21 @@ class ApplicationHandler:
 
         project_dir = os.path.join(self.workspace_dir, self.key)
 
-        print((green(':' * 72)))
+        print((cyan(':' * 72)))
         print('key:             {}'.format(self.key))
         print('workspace:       {}'.format(self.workspace_dir))
         print('project path:    {}'.format(project_dir))
         print('')
 
-        deploy_type = prompt('Deployment type local/remote? l/r', default='l').lower()
+
+        if self.deployment_type:
+            _type = self.deployment_type.split('@')[0]
+            deploy_type = DEPLOYMENT_TYPES[_type][0]
+        else:
+            deploy_type = None
+
+        if not deploy_type:
+            deploy_type = prompt('Deployment type local/remote/dokku? l/r/d').lower()
 
         if deploy_type == 'r':
             raise NotImplementedError('remote deploys are not ready yet... sorry.')
@@ -150,12 +167,21 @@ class ApplicationHandler:
             )
             deployer.run()
 
+        if deploy_type == 'd':
+
+            deployer = DokkuDeployer(
+                key=self.key,
+                project_dir=project_dir,
+                project_settings=self.project_settings
+            )
+            deployer.run()
+
 
 
 
         # deployer = self.api_client.get_deployer(self.key)
         #
-        # print((green(':' * 72)))
+        # print((cyan(':' * 72)))
         # print('uuid:            {}'.format(deployer['uuid']))
         # print('status:          {}'.format(deployer['status']))
         # print('playbook:        {}'.format(deployer['playbook']))
@@ -172,7 +198,7 @@ class ApplicationHandler:
 
         application = self.api_client.detail(self.key)
 
-        print((green(':' * 72)))
+        print((cyan(':' * 72)))
         print('key:             {}'.format(application['key']))
         print('uuid:            {}'.format(application['uuid']))
         print('repository:      {}'.format(application['repository']))
@@ -192,7 +218,7 @@ class ApplicationHandler:
         project_dir = os.path.join(self.workspace_dir, self.key)
         tmuxp_file = os.path.join(project_dir, '.tmuxp.yaml')
 
-        print((green(':' * 72)))
+        print((cyan(':' * 72)))
         print('key:             {}'.format(self.key))
         print('workspace:       {}'.format(self.workspace_dir))
         print('project path:    {}'.format(project_dir))

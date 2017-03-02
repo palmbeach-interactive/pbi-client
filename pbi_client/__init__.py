@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 import argparse
 import os
@@ -25,7 +25,7 @@ PBI.IO - CLI tool - v{version}
     pbi update
     pbi info (example.com)
     pbi deploy (example.com)
-    pbi incubate (example.com) - initialize a project
+    pbi incubate (example.com) - incubate a project (form base repo.)
     pbi create-project (example.com) - create a project on service.pbi.io
     pbi create-application (example.com) - create a application on service.pbi.io
     pbi install (example.com) - local project installaton
@@ -69,8 +69,8 @@ def main():
         required=False
     )
     parser.add_argument(
-        '-i', '--init',
-        dest='init',
+        '-i', '--initialize',
+        dest='initialize',
         help='Initialize project',
         action='store_true',
     )
@@ -114,7 +114,7 @@ def main():
         args_dict['project'] = yaml.load(stream)
         key = args_dict['project'].get('key')
 
-    if action in ['init',] and key:
+    if action in ['initialize',] and key:
         if os.path.exists(PBI_PROJECT_CONFIG_FILE):
             raise EnvironmentError(
                 'Configuration file already exists: {0}. You have to delete it first in order to run "init" again'.format(
@@ -122,7 +122,7 @@ def main():
         else:
             raise EnvironmentError('You have to run "init" in the project directory, without specifying a key.')
 
-    if action in ['init', 'deploy', 'info', 'list', 'check', 'install', 'load', 'create_project', 'create_application']:
+    if action in ['initialize', 'deploy', 'info', 'list', 'check', 'install', 'load', 'create_project', 'create_application']:
         handler = ApplicationHandler(key, **args_dict)
         getattr(handler, action)()
 
