@@ -49,10 +49,6 @@ class LocalDeployer(object):
 
     def run(self, no_input=False):
 
-        print self.key
-        print self.infrastructure_dir
-        print self.playbook_path
-
         with lcd(self.playbook_dir):
             command = 'ansible-playbook -i hosts --tags deploy {playbook_path}'.format(
                 playbook_path=self.playbook_path
