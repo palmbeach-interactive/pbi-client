@@ -36,12 +36,30 @@ Infrastructure Repository
     sudo pip install ansible
 
 
+Ansible settings
+
+    nano ~/.ansible.cfg
+    
+Could look like:
+
+    [defaults]
+    hash_behaviour = merge
+    host_key_checking = False
+    roles_path = ~/ansible/roles
+    retry_files_enabled = False
+    
+    
+Eventually you have to create the *roles* directory:
+
+    mkdir ~/ansible/roles
+
+
 Infrastructure repository is expected to be in folder `~/code/infrastructure/` configured above.
 
-    cd code
+    cd ~/code
     git clone <ask for repository> infrastructure
-    cd infrastructure
-    ansible-galaxy install -r requirements.txt
+    cd infrastructure/ansible
+    ansible-galaxy install -r requirements.yml
 
 
 Verify Installation
