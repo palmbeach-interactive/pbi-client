@@ -9,6 +9,17 @@ Make sure no virtualenv is activated. the pbi client should be installed globall
 
     sudo pip install -I -e "git+https://github.com/palmbeach-interactive/pbi-client.git#egg=pbi-client"
 
+
+
+Notes Python3
+-------------
+
+
+Before installing run:
+
+    sudo pip uninstall Fabric
+
+
 Configuration
 -------------
 
