@@ -30,6 +30,20 @@ You can find your API key on the service platform: https://service.pbi.io/accoun
 
 
 
+Infrastructure Repository
+-------------------------
+
+    sudo pip install ansible
+
+
+Infrastructure repository is expected to be in folder `~/code/infrastructure/` configured above.
+
+    cd code
+    git clone <ask for repository> infrastructure
+    cd infrastructure
+    ansible-galaxy install -r requirements.txt
+
+
 Verify Installation
 -------------------
 
