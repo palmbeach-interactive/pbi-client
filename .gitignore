@@ -7,5 +7,6 @@
 build
 dist
 env
+env3
 *egg-info
 *dev.cfg

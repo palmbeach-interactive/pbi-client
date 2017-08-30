@@ -35,7 +35,7 @@ class APIClient(object):
 
     def check_version(self):
         from .. import  __version__
-        print __version__
+        print(__version__)
 
 
 

@@ -42,10 +42,10 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         'requests>=2.8,<3',
-        'Fabric>=1.10.1,<1.20',
+        'Fabric3',
         'pyyaml',
         'configobj',
-        'python-redmine',
+        'python-redmine==1.5.1',
     ],
 
     # List additional groups of dependencies here (e.g. development

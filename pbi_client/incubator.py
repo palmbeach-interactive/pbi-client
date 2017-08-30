@@ -9,9 +9,16 @@ import shutil
 import sys
 import time
 from redmine import Redmine, ResourceNotFoundError
-from fabric.api import local, settings, abort, run, cd, lcd, env, put, hide, prefix, open_shell
+
+
+
+from fabric.api import (local, settings, abort, run, cd, lcd, env, put, hide, prefix, open_shell)
 from fabric.contrib import files
 from fabric.operations import prompt
+
+
+
+
 from logging.config import fileConfig
 
 # TODO: this is hakish...
@@ -88,7 +95,7 @@ class Incubator:
 
         project_id = self.key.replace('.', '-')
 
-        print project_id
+        print(project_id)
 
         try:
             project = self.redmine_client.project.get(project_id)
@@ -116,7 +123,7 @@ class Incubator:
 
 
     def git_clone(self):
-        
+
         if not self.source:
             raise IncubatorException('clone action requires --source')
 
@@ -157,9 +164,9 @@ class Incubator:
             'git push origin master',
         ]
 
-        print 'Commands to accept:'
+        print('Commands to accept:')
         for command in commands:
-            print command
+            print(command)
 
         if prompt('do you want to run these commands?', default='n').lower() == 'y':
 
@@ -243,7 +250,7 @@ class Incubator:
             'repository': repository,
         }
 
-        print api_client.create(payload)
+        print(api_client.create(payload))
 
 
 

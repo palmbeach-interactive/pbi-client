@@ -35,7 +35,11 @@ class ApplicationHandler:
         virtualenv_dir = kwargs['conf'].get('virtualenv')
         infrastructure_dir = kwargs['conf'].get('infrastructure')
         self.project_settings = kwargs['project']
-        self.deployment_type = kwargs['project'].get('deployment')
+
+        try:
+            self.deployment_type = kwargs['project'].get('deployment')
+        except:
+            self.deployment_type = None
 
         if not workspace_dir:
             raise IOError('workspace not configured')

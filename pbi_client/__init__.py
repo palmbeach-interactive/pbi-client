@@ -8,13 +8,13 @@ import argparse
 import os
 import sys
 import yaml
-from incubator import Incubator
-from client import ClientHandler
-from infrastructure import ApplicationHandler
+from .incubator import Incubator
+from .client import ClientHandler
+from .infrastructure import ApplicationHandler
 from configobj import ConfigObj
-from check import self_check
+from .check import self_check
 
-from settings import DEFAULT_SOURCE, PBI_PROJECT_CONFIG_FILE
+from .settings import DEFAULT_SOURCE, PBI_PROJECT_CONFIG_FILE
 
 
 usage="""
