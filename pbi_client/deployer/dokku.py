@@ -16,10 +16,8 @@ class DokkuDeployer(object):
         self.project_dir = project_dir
         self.project_settings = project_settings
 
+        self.dokku_targets = self.get_dokku_targets()
         self.dokku_host = self.get_dokku_host()
-
-        # get host
-
 
         self.app_name = '-'.join(reversed(self.key.split('.')))
 
@@ -36,6 +34,16 @@ class DokkuDeployer(object):
             raise Exception('unable to get dokku host')
 
 
+    def get_dokku_targets(self):
+
+        targets = self.project_settings.get('targets')
+
+        try:
+            return [i.strip() for i in targets.split(',')]
+        except:
+            return ['production', 'staging']
+
+
 
     def check_dokku_server(self):
 
@@ -48,34 +56,31 @@ class DokkuDeployer(object):
 
             print((cyan(out)))
 
-            wanted_apps = {
-                'production': '{0}'.format(self.app_name),
-                'staging': '{0}-staging'.format(self.app_name)
-            }
-            have_apps = {
-                'production': False,
-                'staging': False
-            }
+            wanted_apps = {}
+            have_apps = {}
+
+            for t in self.dokku_targets:
+                if t == 'production':
+                    key = '{0}'.format(self.app_name)
+                else:
+                    key = '{0}-{1}'.format(self.app_name, t)
+
+                wanted_apps[t] = key
+                have_apps[t] = False
 
             for l in out.split('\n'):
-                if l == wanted_apps['production']:
-                    have_apps['production'] = True
-                if l == wanted_apps['staging']:
-                    have_apps['staging'] = True
+                for k, v in wanted_apps.iteritems():
+                    if l == v:
+                        have_apps[k] = True
 
-        if not (have_apps['production'] and have_apps['staging']):
+            for k, v in have_apps.iteritems():
+                if not v:
+                    print((yellow('app not installed: {}'.format(wanted_apps[k]))))
+                    if prompt('Create it? Y/n', default='y').lower() == 'y':
+                        self.create_app(wanted_apps[k])
 
-            if prompt('Apps do not exist. Create them? Y/n', default='y').lower() == 'y':
-                self.create_app('production')
-                self.create_app('staging')
 
-
-    def create_app(self, type):
-
-        if type == 'production':
-            app_name = '{0}'.format(self.app_name)
-        if type == 'staging':
-            app_name = '{0}-staging'.format(self.app_name)
+    def create_app(self, app_name):
 
         print((cyan('app:create: {0}'.format(app_name))))
 
@@ -114,6 +119,18 @@ class DokkuDeployer(object):
             'staging': False
         }
 
+        wanted_remotes = {}
+        have_remotes = {}
+
+        for t in self.dokku_targets:
+            if t == 'production':
+                key = 'dokku@{0}:{1}'.format(self.dokku_host, self.app_name)
+            else:
+                key = 'dokku@{0}:{1}-{2}'.format(self.dokku_host, self.app_name, t)
+
+            wanted_remotes[t] = key
+            have_remotes[t] = False
+
         with lcd(self.project_dir):
             command = 'git remote -v'
             with quiet():
@@ -121,49 +138,59 @@ class DokkuDeployer(object):
                 print((cyan(out)))
 
             for l in out.split('\n'):
+                if l.startswith('dokku'):
 
-                if l.startswith('dokku') and not have_remotes['production'] and not 'staging' in l:
-                    have_remotes['production'] = wanted_remotes['production'] in l
+                    _l = 'dokku' + l.split('\tdokku')[1].replace('(fetch)', '').replace('(push)', '').strip()
 
-                if l.startswith('dokku-staging') and not have_remotes['staging']:
-                    have_remotes['staging'] = wanted_remotes['staging'] in l
+                    print(blue(_l))
 
-        if not have_remotes['production']:
-            add_remotes['production'] = prompt('Production repository does not in remotes. Add it? Y/n', default='y').lower() == 'y'
+                    for k, v in wanted_remotes.iteritems():
+                        if _l == v:
+                            have_remotes[k] = True
 
-        if not have_remotes['staging']:
-            add_remotes['staging'] = prompt('Staging repository does not in remotes. Add it? Y/n', default='y').lower() == 'y'
+            for k, v in have_remotes.iteritems():
+                if not v:
+                    print((yellow('app "{}" not in remotes: {}'.format(k, wanted_remotes[k]))))
+                    if prompt('add it? Y/n', default='y').lower() == 'y':
+                        pass
+
+                        if k == 'production':
+                            _k = 'dokku'
+                        else:
+                            _k = 'dokku-{}'.format(k)
+
+                        print(red(_k))
+
+                        command = 'git remote rm {}'.format(_k)
+                        with quiet():
+                            local(command)
 
 
-        if add_remotes['production'] or add_remotes['staging']:
-
-            with lcd(self.project_dir):
-
-                if add_remotes['production']:
-                    command = 'git remote rm dokku'
-                    with quiet():
+                        command = 'git remote add {0} {1}'.format(_k, wanted_remotes[k])
                         local(command)
-                    command = 'git remote add dokku {0}'.format(wanted_remotes['production'])
-                    local(command)
-
-                if add_remotes['staging']:
-                    command = 'git remote rm dokku-staging'
-                    with quiet():
-                        local(command)
-                    command = 'git remote add dokku-staging {0}'.format(wanted_remotes['staging'])
-                    local(command)
-
 
 
 
     def run(self, no_input=False):
 
-        branch = prompt('What branch to deploy staging/production? S/p', default='s').lower()
-
-        if branch == 's':
-            command = 'git push -f dokku-staging staging:master'
+        if len(self.dokku_targets) == 1:
+            command = 'git push -f dokku-{branch} {branch}:master'.format(branch=self.dokku_targets[0])
             local(command)
 
-        if branch == 'p':
-            command = 'git push -f dokku master'
+        else:
+            branch = prompt('What branch to deploy {}?'.format('/'.join(self.dokku_targets)), default=self.dokku_targets[0]).lower()
+
+            if branch == 'production':
+                command = 'git push --force dokku master'
+            else:
+                command = 'git push --force dokku-{branch} {branch}:master'.format(branch=branch)
+
             local(command)
+
+        # if branch == 's':
+        #     command = 'git push -f dokku-staging staging:master'
+        #     local(command)
+        #
+        # if branch == 'p':
+        #     command = 'git push -f dokku master'
+        #     local(command)
